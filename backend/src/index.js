@@ -36,10 +36,14 @@ app.use(
 );
 app.use(express.json());
 
+/** SPA + sidebar tree can burst many calls; keep prod sane but avoid blocking local dev. */
+const rateLimitMax = Number(process.env.RATE_LIMIT_MAX);
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000,
-  max: 100,
+  max: Number.isFinite(rateLimitMax) && rateLimitMax > 0 ? rateLimitMax : process.env.NODE_ENV === 'production' ? 600 : 8000,
   message: { success: false, message: 'Too many requests, please try again later.' },
+  standardHeaders: true,
+  legacyHeaders: false,
 });
 app.use(limiter);
 

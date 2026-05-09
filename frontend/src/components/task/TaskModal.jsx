@@ -13,9 +13,9 @@ export default function TaskModal({ taskId, listId, projectId, onClose, onRefetc
   const [description, setDescription] = useState('');
   const [newSubtask, setNewSubtask] = useState('');
 
-  const fetchTask = async () => {
+  const fetchTask = async ({ withLoader = true } = {}) => {
     if (!workspaceId || !projectId || !taskId || !listId) return;
-    setLoading(true);
+    if (withLoader) setLoading(true);
     try {
       const res = await api.get(
         `/workspaces/${workspaceId}/projects/${projectId}/lists/${listId}/tasks/${taskId}`
@@ -25,7 +25,7 @@ export default function TaskModal({ taskId, listId, projectId, onClose, onRefetc
       setTitle(t?.title || '');
       setDescription(t?.description || '');
     } finally {
-      setLoading(false);
+      if (withLoader) setLoading(false);
     }
   };
 
@@ -35,11 +35,12 @@ export default function TaskModal({ taskId, listId, projectId, onClose, onRefetc
   }, [workspaceId, projectId, taskId, listId]);
 
   const updateTask = async (payload) => {
+    setTask((prev) => (prev ? { ...prev, ...payload } : prev));
     await api.patch(
       `/workspaces/${workspaceId}/projects/${projectId}/lists/${listId}/tasks/${taskId}`,
       payload
     );
-    await fetchTask();
+    await fetchTask({ withLoader: false });
     onRefetch();
   };
 
@@ -108,7 +109,7 @@ export default function TaskModal({ taskId, listId, projectId, onClose, onRefetc
                 >
                   <option value="">Unassigned</option>
                   {members.map((m) => (
-                    <option key={m.id} value={m.id}>
+                    <option key={m.user_id || m.id} value={m.user_id || m.id}>
                       {m.name} ({m.email})
                     </option>
                   ))}
@@ -125,7 +126,9 @@ export default function TaskModal({ taskId, listId, projectId, onClose, onRefetc
               </div>
               <div>
                 <p className="text-xs text-gray-500">Created by</p>
-                <p className="text-sm text-gray-800 mt-1">{task?.created_by || '-'}</p>
+                <p className="text-sm text-gray-800 mt-1">
+                  {task?.created_by_name || task?.created_by || '-'}
+                </p>
               </div>
               <div>
                 <p className="text-xs text-gray-500">Created at</p>

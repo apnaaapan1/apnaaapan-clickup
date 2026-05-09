@@ -20,6 +20,7 @@ const {
 const {
   createTask,
   getAllTasks,
+  getMyTasks,
   getSingleTask,
   updateTask,
   moveTask,
@@ -45,6 +46,7 @@ router.patch('/workspaces/:workspaceId/projects/:projectId/lists/:listId', auth,
 router.delete('/workspaces/:workspaceId/projects/:projectId/lists/:listId', auth, deleteList);
 
 // --- Tasks ---
+router.get('/workspaces/:workspaceId/my-tasks', auth, getMyTasks);
 router.post('/workspaces/:workspaceId/projects/:projectId/lists/:listId/tasks', auth, createTask);
 router.get('/workspaces/:workspaceId/projects/:projectId/lists/:listId/tasks', auth, getAllTasks);
 router.patch('/workspaces/:workspaceId/projects/:projectId/lists/:listId/tasks/reorder', auth, reorderTasks);

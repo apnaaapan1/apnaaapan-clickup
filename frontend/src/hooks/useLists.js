@@ -33,5 +33,11 @@ export default function useLists(projectId) {
     refetch();
   }, [refetch]);
 
+  useEffect(() => {
+    const onListsChanged = () => refetch();
+    window.addEventListener('lists:changed', onListsChanged);
+    return () => window.removeEventListener('lists:changed', onListsChanged);
+  }, [refetch]);
+
   return { lists, project, loading, error, refetch };
 }

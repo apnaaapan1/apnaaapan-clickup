@@ -3,6 +3,7 @@ import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import api from '../api/axios';
 import { signInWithGoogle } from '../config/firebase';
+import googleLogo from '../assets/google-logo.svg';
 
 const Register = () => {
   const navigate = useNavigate();
@@ -171,9 +172,10 @@ const Register = () => {
               type="button"
               onClick={handleGoogleAuth}
               disabled={loading}
-              className="w-full py-2.5 border border-gray-200 hover:bg-gray-50 text-gray-700 font-medium rounded-lg transition-colors duration-200"
+              className="w-full py-2.5 border border-gray-200 hover:bg-gray-50 text-gray-700 font-medium rounded-lg transition-colors duration-200 flex items-center justify-center gap-2"
             >
-              Continue with Google
+              <img src={googleLogo} alt="Google" className="w-[18px] h-[18px]" />
+              <span>Continue with Google</span>
             </button>
           </form>
 

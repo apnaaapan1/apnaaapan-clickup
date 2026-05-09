@@ -63,8 +63,8 @@ export default function ListViewRow({ task, projectId, onRefetch, onOpenTask }) 
           ✓
         </button>
         <p
-          className={`text-sm truncate ${
-            task.status === 'done' ? 'line-through text-gray-400' : 'text-gray-800'
+          className={`text-[15px] font-semibold truncate ${
+            task.status === 'done' ? 'line-through text-gray-400' : 'text-gray-900'
           }`}
         >
           {task.title}

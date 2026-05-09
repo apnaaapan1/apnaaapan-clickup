@@ -9,7 +9,7 @@ const priorityClasses = {
   low: 'bg-gray-100 text-gray-600 text-xs px-2 py-0.5 rounded-full',
 };
 
-export default function KanbanCard({ task, onOpenTask }) {
+export default function KanbanCard({ task, columnKey, onOpenTask }) {
   const {
     attributes,
     listeners,
@@ -19,7 +19,7 @@ export default function KanbanCard({ task, onOpenTask }) {
     isDragging,
   } = useSortable({
     id: task.id,
-    data: { type: 'task', listId: task.list_id, task },
+    data: { type: 'task', listId: task.list_id, columnKey, task },
   });
 
   const style = {

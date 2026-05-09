@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useMemo, useState } from 'react';
+import { useParams, useSearchParams } from 'react-router-dom';
 import useLists from '../hooks/useLists';
 import KanbanBoard from '../components/kanban/KanbanBoard';
 import ListView from '../components/listview/ListView';
@@ -7,10 +7,20 @@ import TaskModal from '../components/task/TaskModal';
 
 export default function ProjectDetail() {
   const { projectId } = useParams();
+  const [searchParams] = useSearchParams();
   const { project, lists, loading, error, refetch } = useLists(projectId);
   const [view, setView] = useState('board');
   const [selectedTaskId, setSelectedTaskId] = useState(null);
   const [selectedListId, setSelectedListId] = useState(null);
+  const selectedListFromQueryId = searchParams.get('list');
+  const selectedList = useMemo(
+    () => lists.find((list) => String(list.id) === String(selectedListFromQueryId)),
+    [lists, selectedListFromQueryId]
+  );
+  const visibleLists = useMemo(
+    () => (selectedList ? [selectedList] : lists),
+    [lists, selectedList]
+  );
 
   const onOpenTask = (task) => {
     setSelectedTaskId(task.id);
@@ -26,7 +36,12 @@ export default function ProjectDetail() {
               className="w-3 h-3 rounded-full"
               style={{ background: project?.color || '#6366f1' }}
             />
-            <h1 className="text-2xl font-bold text-gray-800">{project?.name || 'Space'}</h1>
+            <h1 className="text-2xl font-bold text-gray-800">
+              {project?.name || 'Space'}
+              {selectedList ? (
+                <span className="text-xl font-medium text-gray-500"> / {selectedList.name}</span>
+              ) : null}
+            </h1>
           </div>
           <div className="flex items-center gap-2">
             <button
@@ -64,14 +79,14 @@ export default function ProjectDetail() {
           {view === 'board' ? (
             <KanbanBoard
               project={project}
-              lists={lists}
+              lists={visibleLists}
               onRefetch={refetch}
               onOpenTask={onOpenTask}
             />
           ) : (
             <ListView
               project={project}
-              lists={lists}
+              lists={visibleLists}
               onRefetch={refetch}
               onOpenTask={onOpenTask}
             />

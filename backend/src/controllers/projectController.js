@@ -26,6 +26,7 @@ const createProject = async (req, res) => {
 
 const getAllProjects = async (req, res) => {
   const { workspaceId } = req.params;
+  const includeLists = req.query.includeLists === 'true';
 
   try {
     const result = await pool.query(
@@ -35,7 +36,29 @@ const getAllProjects = async (req, res) => {
       [workspaceId]
     );
 
-    return res.status(200).json({ success: true, projects: result.rows });
+    const projects = result.rows;
+
+    if (!includeLists || projects.length === 0) {
+      return res.status(200).json({ success: true, projects });
+    }
+
+    const ids = projects.map((p) => p.id);
+    const listsResult = await pool.query(
+      `SELECT * FROM lists WHERE project_id = ANY($1::uuid[]) ORDER BY project_id, position ASC`,
+      [ids]
+    );
+
+    const listsByProjectId = {};
+    for (const row of listsResult.rows) {
+      if (!listsByProjectId[row.project_id]) listsByProjectId[row.project_id] = [];
+      listsByProjectId[row.project_id].push(row);
+    }
+
+    for (const p of projects) {
+      p.lists = listsByProjectId[p.id] || [];
+    }
+
+    return res.status(200).json({ success: true, projects });
   } catch (err) {
     console.error('getAllProjects error:', err.message);
     return res.status(500).json({ success: false, message: 'Server error' });

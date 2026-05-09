@@ -73,6 +73,44 @@ const getAllTasks = async (req, res) => {
   }
 };
 
+const getMyTasks = async (req, res) => {
+  const { workspaceId } = req.params;
+  const userId = req.user.userId;
+
+  try {
+    const result = await pool.query(
+      `SELECT
+         t.*,
+         l.name AS list_name,
+         p.id AS project_id,
+         p.name AS project_name
+       FROM tasks t
+       JOIN lists l ON t.list_id = l.id
+       JOIN projects p ON l.project_id = p.id
+       WHERE p.workspace_id = $1
+         AND t.assignee_id = $2
+         AND t.parent_task_id IS NULL
+         AND p.status = 'active'
+       ORDER BY
+         CASE t.status
+           WHEN 'in_progress' THEN 0
+           WHEN 'in_review' THEN 1
+           WHEN 'todo' THEN 2
+           WHEN 'done' THEN 3
+           WHEN 'cancelled' THEN 4
+           ELSE 5
+         END,
+         t.updated_at DESC`,
+      [workspaceId, userId]
+    );
+
+    return res.status(200).json({ success: true, tasks: result.rows });
+  } catch (err) {
+    console.error('getMyTasks error:', err.message);
+    return res.status(500).json({ success: false, message: 'Server error' });
+  }
+};
+
 const getSingleTask = async (req, res) => {
   const { taskId } = req.params;
 
@@ -80,9 +118,11 @@ const getSingleTask = async (req, res) => {
     const taskResult = await pool.query(
       `SELECT t.*,
               u.name  AS assignee_name,
-              u.avatar_url AS assignee_avatar
+              u.avatar_url AS assignee_avatar,
+              cu.name AS created_by_name
        FROM tasks t
        LEFT JOIN users u ON t.assignee_id = u.id
+       LEFT JOIN users cu ON t.created_by = cu.id
        WHERE t.id = $1`,
       [taskId]
     );
@@ -245,6 +285,7 @@ const deleteTask = async (req, res) => {
 module.exports = {
   createTask,
   getAllTasks,
+  getMyTasks,
   getSingleTask,
   updateTask,
   moveTask,

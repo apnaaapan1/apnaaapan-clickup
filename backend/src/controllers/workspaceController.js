@@ -50,6 +50,7 @@ const getWorkspace = async (req, res) => {
     const membersResult = await pool.query(
       `SELECT
          wm.id,
+         wm.user_id,
          u.name,
          u.email,
          u.avatar_url,
