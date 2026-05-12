@@ -41,7 +41,7 @@ export default function TaskModal({ taskId, listId, projectId, onClose, onRefetc
       payload
     );
     await fetchTask({ withLoader: false });
-    onRefetch();
+    window.dispatchEvent(new Event('tasks:changed'));
   };
 
   const createdAt = useMemo(
@@ -51,33 +51,9 @@ export default function TaskModal({ taskId, listId, projectId, onClose, onRefetc
 
   return (
     <div className="fixed inset-0 z-50 bg-black/30">
-      <div className="fixed right-0 top-0 h-screen w-[560px] bg-white shadow-xl translate-x-0 transition-transform duration-300 overflow-y-auto">
-        <div className="p-5 border-b border-gray-200 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <select
-              value={task?.status || 'todo'}
-              onChange={(e) => updateTask({ status: e.target.value })}
-              className="px-2 py-1 border border-gray-200 rounded-lg text-sm"
-            >
-              <option value="todo">todo</option>
-              <option value="in_progress">in_progress</option>
-              <option value="in_review">in_review</option>
-              <option value="done">done</option>
-              <option value="cancelled">cancelled</option>
-            </select>
-            <select
-              value={task?.priority || 'medium'}
-              onChange={(e) => updateTask({ priority: e.target.value })}
-              className="px-2 py-1 border border-gray-200 rounded-lg text-sm"
-            >
-              <option value="urgent">urgent</option>
-              <option value="high">high</option>
-              <option value="medium">medium</option>
-              <option value="low">low</option>
-              <option value="none">none</option>
-            </select>
-          </div>
-          <button onClick={onClose} className="text-gray-500 hover:text-gray-700">
+      <div className="fixed right-0 top-0 h-screen w-[min(100vw,720px)] bg-white shadow-xl translate-x-0 transition-transform duration-300 overflow-y-auto">
+        <div className="p-5 border-b border-gray-200 flex justify-end shrink-0">
+          <button type="button" onClick={onClose} className="text-gray-500 hover:text-gray-700 p-1" aria-label="Close">
             ✕
           </button>
         </div>
@@ -95,8 +71,40 @@ export default function TaskModal({ taskId, listId, projectId, onClose, onRefetc
                 onBlur={() => {
                   if (title.trim() && title !== task?.title) updateTask({ title: title.trim() });
                 }}
-                className="w-full text-[20px] font-semibold outline-none border-b border-transparent focus:border-gray-200 pb-1"
+                className="w-full text-[22px] font-semibold text-gray-900 outline-none border-b border-transparent focus:border-gray-200 pb-1"
+                placeholder="Task name"
               />
+            </section>
+
+            <section className="grid grid-cols-2 gap-4">
+              <div>
+                <p className="text-xs font-medium text-gray-500 mb-1">Status</p>
+                <select
+                  value={task?.status || 'todo'}
+                  onChange={(e) => updateTask({ status: e.target.value })}
+                  className="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-sm bg-white"
+                >
+                  <option value="todo">todo</option>
+                  <option value="in_progress">in_progress</option>
+                  <option value="in_review">in_review</option>
+                  <option value="done">done</option>
+                  <option value="cancelled">cancelled</option>
+                </select>
+              </div>
+              <div>
+                <p className="text-xs font-medium text-gray-500 mb-1">Priority</p>
+                <select
+                  value={task?.priority || 'medium'}
+                  onChange={(e) => updateTask({ priority: e.target.value })}
+                  className="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-sm bg-white"
+                >
+                  <option value="urgent">urgent</option>
+                  <option value="high">high</option>
+                  <option value="medium">medium</option>
+                  <option value="low">low</option>
+                  <option value="none">none</option>
+                </select>
+              </div>
             </section>
 
             <section className="grid grid-cols-2 gap-4">
@@ -167,7 +175,7 @@ export default function TaskModal({ taskId, listId, projectId, onClose, onRefetc
                             `/workspaces/${workspaceId}/projects/${projectId}/lists/${listId}/tasks/${sub.id}`,
                             { status: sub.status === 'done' ? 'todo' : 'done' }
                           )
-                          .then(fetchTask)
+                          .then(() => fetchTask({ withLoader: false }))
                       }
                     />
                     <span className={sub.status === 'done' ? 'line-through text-gray-400' : ''}>
@@ -187,8 +195,7 @@ export default function TaskModal({ taskId, listId, projectId, onClose, onRefetc
                         )
                         .then(() => {
                           setNewSubtask('');
-                          fetchTask();
-                          onRefetch();
+                          fetchTask({ withLoader: false });
                         });
                     }
                   }}

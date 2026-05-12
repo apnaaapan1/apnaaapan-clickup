@@ -1,3 +1,4 @@
+import { useRef } from 'react';
 import NotificationDropdown from './NotificationDropdown';
 
 export default function NotificationBell({
@@ -9,14 +10,22 @@ export default function NotificationBell({
   markOneAsRead,
   markAllAsRead,
   deleteNotification,
+  placement = 'header',
 }) {
   const badgeText = unreadCount > 9 ? '9+' : unreadCount;
+  const containerRef = useRef(null);
+
+  const buttonClass =
+    placement === 'sidebar'
+      ? 'relative w-10 h-10 rounded-lg hover:bg-white/10 text-white flex items-center justify-center'
+      : 'relative w-10 h-10 rounded-lg border border-gray-200 bg-white text-gray-700 hover:bg-gray-50 flex items-center justify-center shadow-sm';
 
   return (
-    <div className="relative">
+    <div ref={containerRef} className="relative">
       <button
+        type="button"
         onClick={toggleDropdown}
-        className="relative w-10 h-10 rounded-lg hover:bg-white/10 text-white flex items-center justify-center"
+        className={buttonClass}
         aria-label="Toggle notifications"
       >
         <i className="ti ti-bell text-[20px]" />
@@ -29,6 +38,8 @@ export default function NotificationBell({
 
       {isOpen && (
         <NotificationDropdown
+          containerRef={containerRef}
+          placement={placement}
           notifications={notifications}
           unreadCount={unreadCount}
           loading={loading}

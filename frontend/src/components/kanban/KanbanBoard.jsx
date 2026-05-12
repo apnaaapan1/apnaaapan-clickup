@@ -50,6 +50,12 @@ export default function KanbanBoard({ project, lists, onRefetch, onOpenTask }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [workspaceId, project?.id, lists.map((l) => l.id).join(',')]);
 
+  useEffect(() => {
+    const onTasksChanged = () => fetchAllTasks();
+    window.addEventListener('tasks:changed', onTasksChanged);
+    return () => window.removeEventListener('tasks:changed', onTasksChanged);
+  }, []);
+
   const allTasks = useMemo(
     () => Object.values(tasksByList).flat(),
     [tasksByList]
@@ -196,7 +202,7 @@ export default function KanbanBoard({ project, lists, onRefetch, onOpenTask }) {
               <div className="px-3 py-3 flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <span
-                    className={`inline-flex items-center px-2.5 py-1 rounded-full border text-xs font-semibold tracking-wide ${column.badgeClass}`}
+                    className={`inline-flex items-center px-3 py-1 rounded-full border text-[13px] font-bold tracking-wide ${column.badgeClass}`}
                   >
                     {column.label}
                   </span>

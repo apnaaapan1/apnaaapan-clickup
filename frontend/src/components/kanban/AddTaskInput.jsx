@@ -3,7 +3,7 @@ import useWorkspaceMembers from '../../hooks/useWorkspaceMembers';
 
 const priorities = ['urgent', 'high', 'medium', 'low', 'none'];
 
-export default function AddTaskInput({ onSubmit, onCancel }) {
+export default function AddTaskInput({ onSubmit, onCancel, disableOutsideClose = false }) {
   const panelRef = useRef(null);
   const inputRef = useRef(null);
   const { members } = useWorkspaceMembers();
@@ -19,6 +19,7 @@ export default function AddTaskInput({ onSubmit, onCancel }) {
   }, []);
 
   useEffect(() => {
+    if (disableOutsideClose) return undefined;
     const onDown = (e) => {
       if (panelRef.current && !panelRef.current.contains(e.target)) {
         onCancel();
@@ -26,7 +27,7 @@ export default function AddTaskInput({ onSubmit, onCancel }) {
     };
     document.addEventListener('mousedown', onDown);
     return () => document.removeEventListener('mousedown', onDown);
-  }, [onCancel]);
+  }, [onCancel, disableOutsideClose]);
 
   const handleSave = async () => {
     const trimmedTitle = title.trim();

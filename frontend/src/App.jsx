@@ -5,6 +5,7 @@ import Login from './pages/Login';
 import Register from './pages/Register';
 import AppLayout from './components/layout/AppLayout';
 import Projects from './pages/Projects';
+import ManageSpacesPage from './pages/ManageSpacesPage';
 import ProjectDetail from './pages/ProjectDetail';
 import WorkspaceSettings from './pages/WorkspaceSettings';
 import WorkInProgressPage from './pages/WorkInProgressPage';
@@ -30,6 +31,7 @@ function App() {
               <Route path="/replies" element={<WorkInProgressPage title="Replies" />} />
               <Route path="/my-tasks" element={<MyTasksPage />} />
               <Route path="/projects" element={<Projects />} />
+              <Route path="/spaces/manage" element={<ManageSpacesPage />} />
               <Route path="/projects/:projectId" element={<ProjectDetail />} />
               <Route
                 path="/projects/:projectId/tasks/:taskId"

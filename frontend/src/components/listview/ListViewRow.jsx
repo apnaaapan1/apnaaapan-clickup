@@ -3,10 +3,10 @@ import api from '../../api/axios';
 import { useAuth } from '../../context/AuthContext';
 
 const priorityClasses = {
-  urgent: 'bg-red-100 text-red-700 text-xs px-2 py-0.5 rounded-full',
-  high: 'bg-orange-100 text-orange-700 text-xs px-2 py-0.5 rounded-full',
-  medium: 'bg-yellow-100 text-yellow-700 text-xs px-2 py-0.5 rounded-full',
-  low: 'bg-gray-100 text-gray-600 text-xs px-2 py-0.5 rounded-full',
+  urgent: 'bg-red-100 text-red-700 text-[14px] px-3 py-1 rounded-full font-medium',
+  high: 'bg-orange-100 text-orange-700 text-[14px] px-3 py-1 rounded-full font-medium',
+  medium: 'bg-yellow-100 text-yellow-700 text-[14px] px-3 py-1 rounded-full font-medium',
+  low: 'bg-gray-100 text-gray-600 text-[14px] px-3 py-1 rounded-full font-medium',
 };
 
 const statusClasses = {
@@ -48,13 +48,13 @@ export default function ListViewRow({ task, projectId, onRefetch, onOpenTask }) 
 
   return (
     <div
-      className="flex items-center gap-3 py-2 px-4 border-b border-[#f3f4f6] hover:bg-gray-50 cursor-pointer"
+      className="flex items-center gap-4 py-2.5 px-4 border-b border-[#f3f4f6] hover:bg-gray-50 cursor-pointer"
       onClick={() => onOpenTask(task)}
     >
-      <div className="flex items-center gap-2 flex-1 min-w-0">
+      <div className="flex items-center gap-2.5 flex-1 min-w-0">
         <button
           onClick={handleDone}
-          className={`w-5 h-5 rounded-full border flex items-center justify-center text-xs ${
+          className={`w-6 h-6 shrink-0 rounded-full border flex items-center justify-center text-sm leading-none ${
             task.status === 'done'
               ? 'border-green-500 bg-green-500 text-white'
               : 'border-gray-300 text-transparent'
@@ -63,7 +63,7 @@ export default function ListViewRow({ task, projectId, onRefetch, onOpenTask }) 
           ✓
         </button>
         <p
-          className={`text-[15px] font-semibold truncate ${
+          className={`text-base font-semibold truncate ${
             task.status === 'done' ? 'line-through text-gray-400' : 'text-gray-900'
           }`}
         >
@@ -71,34 +71,34 @@ export default function ListViewRow({ task, projectId, onRefetch, onOpenTask }) 
         </p>
       </div>
 
-      <div className="w-[80px] flex justify-center">
+      <div className="w-[108px] flex justify-center">
         {initials ? (
-          <div className="w-7 h-7 rounded-full bg-indigo-100 text-indigo-700 text-[10px] font-semibold flex items-center justify-center">
+          <div className="w-8 h-8 rounded-full bg-indigo-100 text-indigo-700 text-[11px] font-semibold flex items-center justify-center">
             {initials}
           </div>
         ) : (
-          <div className="w-7 h-7 rounded-full border border-dashed border-gray-300" />
+          <div className="w-8 h-8 rounded-full border border-dashed border-gray-300" />
         )}
       </div>
 
-      <div className={`w-[100px] text-xs ${dueClass}`}>
+      <div className={`w-[118px] text-[14px] font-medium ${dueClass}`}>
         {dueDate && isPast(dueDate) && !isToday(dueDate) ? '⚠ ' : ''}
         {dueText}
       </div>
 
-      <div className="w-[90px]">
+      <div className="w-[112px]">
         {task.priority ? (
           <span className={priorityClasses[task.priority] || priorityClasses.medium}>
             {task.priority}
           </span>
         ) : (
-          <span className="text-xs text-gray-400">-</span>
+          <span className="text-[14px] text-gray-400">-</span>
         )}
       </div>
 
-      <div className="w-[110px]">
+      <div className="w-[128px]">
         <span
-          className={`text-xs px-2 py-0.5 rounded-full ${
+          className={`text-[14px] font-medium px-3 py-1 rounded-full ${
             statusClasses[task.status] || statusClasses.todo
           }`}
         >

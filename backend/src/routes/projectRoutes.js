@@ -15,6 +15,7 @@ const {
   updateList,
   deleteList,
   reorderLists,
+  moveList,
 } = require('../controllers/listController');
 
 const {
@@ -42,6 +43,7 @@ router.delete('/workspaces/:workspaceId/projects/:projectId', auth, deleteProjec
 // --- Lists ---
 router.post('/workspaces/:workspaceId/projects/:projectId/lists', auth, createList);
 router.patch('/workspaces/:workspaceId/projects/:projectId/lists/reorder', auth, reorderLists);
+router.patch('/workspaces/:workspaceId/projects/:projectId/lists/:listId/move', auth, moveList);
 router.patch('/workspaces/:workspaceId/projects/:projectId/lists/:listId', auth, updateList);
 router.delete('/workspaces/:workspaceId/projects/:projectId/lists/:listId', auth, deleteList);
 

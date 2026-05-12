@@ -5,6 +5,7 @@ import api from '../../api/axios';
 import useTasks from '../../hooks/useTasks';
 import KanbanCard from './KanbanCard';
 import AddTaskInput from './AddTaskInput';
+import ListBulletIcon from '../icons/ListBulletIcon';
 
 const statusAccent = {
   todo: '#94a3b8',
@@ -40,9 +41,12 @@ export default function KanbanColumn({ list, workspaceId, projectId, onRefetch, 
         className="px-3 py-3 border-b border-gray-100 flex items-center justify-between"
         style={{ borderLeft: `3px solid ${statusAccent[list.status || 'todo'] || '#94a3b8'}` }}
       >
-        <div className="flex items-center gap-2 min-w-0">
-          <h3 className="text-[14px] font-semibold text-gray-800 truncate">{list.name}</h3>
-          <span className="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full">
+        <div className="flex items-center gap-2 min-w-0 flex-1">
+          <ListBulletIcon className="w-3.5 h-3.5 shrink-0 text-gray-400" />
+          <h3 className="text-[14px] font-semibold text-gray-800 truncate min-w-0 flex-1">
+            {list.name}
+          </h3>
+          <span className="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full shrink-0">
             {tasks.length}
           </span>
         </div>

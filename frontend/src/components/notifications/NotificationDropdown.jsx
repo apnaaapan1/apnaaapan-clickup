@@ -1,5 +1,8 @@
-import { useEffect, useMemo, useRef } from 'react';
-import { formatDistanceToNow } from 'date-fns';
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
+import { formatDistanceToNow, isValid } from 'date-fns';
+
+const DROPDOWN_WIDTH = 340;
 
 const typeStyles = {
   task_assigned: {
@@ -20,7 +23,14 @@ function NotificationItem({ notification, onMarkOne, onDelete }) {
   const style = typeStyles[notification.type] || typeStyles.default;
   const timeLabel = useMemo(() => {
     if (!notification.created_at) return 'Just now';
-    return formatDistanceToNow(new Date(notification.created_at), { addSuffix: true });
+    const raw = notification.created_at;
+    const d = new Date(raw);
+    if (!isValid(d)) return 'Just now';
+    try {
+      return formatDistanceToNow(d, { addSuffix: true });
+    } catch {
+      return 'Just now';
+    }
   }, [notification.created_at]);
 
   return (
@@ -33,8 +43,12 @@ function NotificationItem({ notification, onMarkOne, onDelete }) {
         <i className={style.icon} />
       </div>
       <button className="min-w-0 flex-1 text-left" onClick={() => !notification.is_read && onMarkOne(notification.id)}>
-        <p className="text-[13px] font-medium text-gray-800 truncate">{notification.title}</p>
-        <p className="text-[12px] text-gray-500 line-clamp-2">{notification.message || ''}</p>
+        <p className="text-[13px] font-medium text-gray-800 truncate">
+          {notification.title != null ? String(notification.title) : 'Notification'}
+        </p>
+        <p className="text-[12px] text-gray-500 line-clamp-2">
+          {notification.message != null ? String(notification.message) : ''}
+        </p>
         <p className="text-[11px] text-gray-400 mt-1">{timeLabel}</p>
       </button>
       <div className="flex flex-col items-center gap-2 pt-1">
@@ -60,6 +74,8 @@ function NotificationItem({ notification, onMarkOne, onDelete }) {
 }
 
 export default function NotificationDropdown({
+  containerRef,
+  placement = 'header',
   notifications,
   unreadCount,
   loading,
@@ -69,31 +85,71 @@ export default function NotificationDropdown({
   onClose,
 }) {
   const panelRef = useRef(null);
+  const [fixedStyle, setFixedStyle] = useState(null);
+
+  useLayoutEffect(() => {
+    if (placement !== 'header' || !containerRef?.current) {
+      setFixedStyle(null);
+      return undefined;
+    }
+    const update = () => {
+      const el = containerRef.current;
+      if (!el) return;
+      const rect = el.getBoundingClientRect();
+      const left = Math.max(8, rect.right - DROPDOWN_WIDTH);
+      setFixedStyle({
+        position: 'fixed',
+        top: rect.bottom + 8,
+        left,
+        width: DROPDOWN_WIDTH,
+        zIndex: 99999,
+      });
+    };
+    update();
+    window.addEventListener('scroll', update, true);
+    window.addEventListener('resize', update);
+    return () => {
+      window.removeEventListener('scroll', update, true);
+      window.removeEventListener('resize', update);
+    };
+  }, [containerRef, placement, notifications.length, unreadCount, loading]);
 
   useEffect(() => {
-    const handleOutside = (e) => {
-      if (panelRef.current && !panelRef.current.contains(e.target)) {
+    let removeListener = () => {};
+    const rafId = requestAnimationFrame(() => {
+      const handleOutside = (e) => {
+        if (containerRef?.current?.contains(e.target)) return;
+        if (panelRef.current?.contains(e.target)) return;
         onClose();
-      }
+      };
+      document.addEventListener('mousedown', handleOutside);
+      removeListener = () => document.removeEventListener('mousedown', handleOutside);
+    });
+    return () => {
+      cancelAnimationFrame(rafId);
+      removeListener();
     };
-    document.addEventListener('mousedown', handleOutside);
-    return () => document.removeEventListener('mousedown', handleOutside);
-  }, [onClose]);
+  }, [onClose, containerRef]);
 
-  return (
-    <div
-      ref={panelRef}
-      className="absolute left-[58px] bottom-0 z-50 w-[340px] max-h-[480px] bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden"
-    >
+  const positionClass =
+    placement === 'sidebar'
+      ? 'absolute left-[58px] bottom-0 z-50 w-[340px] max-h-[480px]'
+      : null;
+
+  const shellClass =
+    'bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden max-h-[480px] pointer-events-auto';
+
+  const inner = (
+    <>
       <div className="flex items-center justify-between px-4 py-3 border-b border-gray-100">
         <p className="text-[14px] font-medium text-gray-900">Notifications</p>
         <div className="flex items-center gap-3">
           {unreadCount > 0 && (
-            <button className="text-[12px] text-purple-600 hover:text-purple-700" onClick={onMarkAll}>
+            <button type="button" className="text-[12px] text-purple-600 hover:text-purple-700" onClick={onMarkAll}>
               Mark all as read
             </button>
           )}
-          <button className="text-gray-400 hover:text-gray-600 text-sm" onClick={onClose}>
+          <button type="button" className="text-gray-400 hover:text-gray-600 text-sm" onClick={onClose}>
             ✕
           </button>
         </div>
@@ -111,9 +167,9 @@ export default function NotificationDropdown({
             <p className="text-xs text-gray-400">You are all caught up!</p>
           </div>
         ) : (
-          notifications.map((notification) => (
+          notifications.map((notification, idx) => (
             <NotificationItem
-              key={notification.id}
+              key={notification.id != null ? String(notification.id) : `n-${idx}`}
               notification={notification}
               onMarkOne={onMarkOne}
               onDelete={onDelete}
@@ -121,6 +177,24 @@ export default function NotificationDropdown({
           ))
         )}
       </div>
+    </>
+  );
+
+  if (placement === 'header') {
+    if (!fixedStyle || typeof document === 'undefined' || !document.body) {
+      return null;
+    }
+    return createPortal(
+      <div ref={panelRef} className={shellClass} style={fixedStyle}>
+        {inner}
+      </div>,
+      document.body
+    );
+  }
+
+  return (
+    <div ref={panelRef} className={`${positionClass} ${shellClass} w-[340px]`}>
+      {inner}
     </div>
   );
 }

@@ -3,10 +3,10 @@ import { CSS } from '@dnd-kit/utilities';
 import { useSortable } from '@dnd-kit/sortable';
 
 const priorityClasses = {
-  urgent: 'bg-red-100 text-red-700 text-xs px-2 py-0.5 rounded-full',
-  high: 'bg-orange-100 text-orange-700 text-xs px-2 py-0.5 rounded-full',
-  medium: 'bg-yellow-100 text-yellow-700 text-xs px-2 py-0.5 rounded-full',
-  low: 'bg-gray-100 text-gray-600 text-xs px-2 py-0.5 rounded-full',
+  urgent: 'bg-red-100 text-red-700 text-[13px] font-medium px-2.5 py-0.5 rounded-full',
+  high: 'bg-orange-100 text-orange-700 text-[13px] font-medium px-2.5 py-0.5 rounded-full',
+  medium: 'bg-yellow-100 text-yellow-700 text-[13px] font-medium px-2.5 py-0.5 rounded-full',
+  low: 'bg-gray-100 text-gray-600 text-[13px] font-medium px-2.5 py-0.5 rounded-full',
 };
 
 export default function KanbanCard({ task, columnKey, onOpenTask }) {
@@ -66,20 +66,20 @@ export default function KanbanCard({ task, columnKey, onOpenTask }) {
         isDragging ? 'opacity-50 shadow-md' : ''
       }`}
     >
-      <p className="text-sm font-medium text-gray-800">{task.title}</p>
+      <p className="text-[15px] font-semibold text-gray-900">{task.title}</p>
 
       <div className="mt-2 flex items-center justify-between gap-2">
         {task.priority && priorityClasses[task.priority] && (
           <span className={priorityClasses[task.priority]}>{task.priority}</span>
         )}
         {dateMeta && (
-          <span className={`text-xs ${dateMeta.color}`}>📅 {dateMeta.label}</span>
+          <span className={`text-[13px] font-medium ${dateMeta.color}`}>📅 {dateMeta.label}</span>
         )}
       </div>
 
       {assigneeInitials && (
         <div className="mt-2 flex justify-end">
-          <div className="w-6 h-6 rounded-full bg-indigo-100 text-indigo-700 text-[10px] font-semibold flex items-center justify-center">
+          <div className="w-7 h-7 rounded-full bg-indigo-100 text-indigo-700 text-[11px] font-semibold flex items-center justify-center">
             {assigneeInitials}
           </div>
         </div>
