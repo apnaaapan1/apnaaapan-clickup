@@ -4,17 +4,35 @@ import { formatDistanceToNow, isValid } from 'date-fns';
 
 const DROPDOWN_WIDTH = 340;
 
+const iconSvgs = {
+  task_assigned: (
+    <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" /><circle cx="8.5" cy="7" r="4" /><polyline points="17 11 19 13 23 9" />
+    </svg>
+  ),
+  task_completed: (
+    <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" /><polyline points="22 4 12 14.01 9 11.01" />
+    </svg>
+  ),
+  default: (
+    <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" /><path d="M13.73 21a2 2 0 0 1-3.46 0" />
+    </svg>
+  ),
+};
+
 const typeStyles = {
   task_assigned: {
-    icon: 'ti ti-user-check',
+    icon: 'task_assigned',
     bg: 'bg-purple-100 text-purple-700',
   },
   task_completed: {
-    icon: 'ti ti-circle-check',
+    icon: 'task_completed',
     bg: 'bg-green-100 text-green-700',
   },
   default: {
-    icon: 'ti ti-bell',
+    icon: 'default',
     bg: 'bg-gray-100 text-gray-600',
   },
 };
@@ -40,7 +58,7 @@ function NotificationItem({ notification, onMarkOne, onDelete }) {
       }`}
     >
       <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm ${style.bg}`}>
-        <i className={style.icon} />
+        {iconSvgs[style.icon] || iconSvgs.default}
       </div>
       <button className="min-w-0 flex-1 text-left" onClick={() => !notification.is_read && onMarkOne(notification.id)}>
         <p className="text-[13px] font-medium text-gray-800 truncate">
@@ -66,7 +84,9 @@ function NotificationItem({ notification, onMarkOne, onDelete }) {
           title="Delete"
           aria-label="Delete notification"
         >
-          <i className="ti ti-trash" />
+          <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24" strokeLinecap="round" strokeLinejoin="round">
+            <polyline points="3 6 5 6 21 6" /><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" /><path d="M10 11v6" /><path d="M14 11v6" /><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2" />
+          </svg>
         </button>
       </div>
     </div>
@@ -161,7 +181,9 @@ export default function NotificationDropdown({
         ) : notifications.length === 0 ? (
           <div className="h-40 flex flex-col items-center justify-center gap-1 text-center">
             <div className="w-10 h-10 rounded-full bg-gray-100 text-gray-400 flex items-center justify-center">
-              <i className="ti ti-bell" />
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" /><path d="M13.73 21a2 2 0 0 1-3.46 0" />
+              </svg>
             </div>
             <p className="text-sm text-gray-600">No notifications yet</p>
             <p className="text-xs text-gray-400">You are all caught up!</p>

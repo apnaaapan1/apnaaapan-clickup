@@ -62,8 +62,8 @@ export default function KanbanCard({ task, columnKey, onOpenTask }) {
       {...attributes}
       {...listeners}
       onClick={() => onOpenTask?.(task)}
-      className={`bg-white border border-[#e5e7eb] rounded-lg px-3 py-2.5 mb-1.5 cursor-grab active:cursor-grabbing ${
-        isDragging ? 'opacity-50 shadow-md' : ''
+      className={`bg-white border border-[#e5e7eb] rounded-lg px-3 py-2.5 mb-1.5 cursor-pointer select-none ${
+        isDragging ? 'opacity-50 shadow-md cursor-grabbing' : ''
       }`}
     >
       <p className="text-[15px] font-semibold text-gray-900">{task.title}</p>

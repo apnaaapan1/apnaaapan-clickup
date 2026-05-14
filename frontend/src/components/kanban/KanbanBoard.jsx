@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { DndContext, DragOverlay, useDroppable } from '@dnd-kit/core';
+import { DndContext, DragOverlay, PointerSensor, useDroppable, useSensor, useSensors } from '@dnd-kit/core';
 import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import api from '../../api/axios';
 import { useAuth } from '../../context/AuthContext';
@@ -24,6 +24,12 @@ export default function KanbanBoard({ project, lists, onRefetch, onOpenTask }) {
   const [addingStatus, setAddingStatus] = useState(null);
   const [creatingTask, setCreatingTask] = useState(false);
   const [activeTask, setActiveTask] = useState(null);
+
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: { distance: 8 },
+    })
+  );
 
   const fetchAllTasks = async () => {
     if (!workspaceId || !project?.id || lists.length === 0) {
@@ -115,14 +121,22 @@ export default function KanbanBoard({ project, lists, onRefetch, onOpenTask }) {
           ? { title: payload }
           : payload || {};
 
-      await api.post(`/workspaces/${workspaceId}/projects/${project.id}/lists/${targetListId}/tasks`, {
+      const res = await api.post(`/workspaces/${workspaceId}/projects/${project.id}/lists/${targetListId}/tasks`, {
         priority: 'medium',
         status: columnStatus,
         ...basePayload,
       });
+
+      const newTask = res.data?.task;
+      if (newTask) {
+        setTasksByList((prev) => ({
+          ...prev,
+          [targetListId]: [...(prev[targetListId] || []), newTask],
+        }));
+      }
+
       setAddingStatus(null);
-      await fetchAllTasks();
-      onRefetch();
+      fetchAllTasks();
     } finally {
       setCreatingTask(false);
     }
@@ -147,13 +161,13 @@ export default function KanbanBoard({ project, lists, onRefetch, onOpenTask }) {
       return;
     }
 
-    const activeTask = active?.data?.current?.task;
-    if (!activeTask) {
+    const draggedTask = active?.data?.current?.task;
+    if (!draggedTask) {
       setActiveTask(null);
       return;
     }
 
-    const fromColumnKey = active?.data?.current?.columnKey || statusToColumnKey(activeTask.status);
+    const fromColumnKey = active?.data?.current?.columnKey || statusToColumnKey(draggedTask.status);
     const overType = over?.data?.current?.type;
     const toColumnKey =
       overType === 'column'
@@ -168,22 +182,31 @@ export default function KanbanBoard({ project, lists, onRefetch, onOpenTask }) {
     }
 
     const nextStatus = columnKeyToStatus[toColumnKey];
-    if (!nextStatus || nextStatus === activeTask.status) {
+    if (!nextStatus || nextStatus === draggedTask.status) {
       setActiveTask(null);
       return;
     }
 
-    await api.patch(
-      `/workspaces/${workspaceId}/projects/${project.id}/lists/${activeTask.list_id}/tasks/${activeTask.id}`,
-      { status: nextStatus }
-    );
-    await fetchAllTasks();
-    onRefetch();
+    setTasksByList((prev) => {
+      const updated = {};
+      for (const [listId, tasks] of Object.entries(prev)) {
+        updated[listId] = tasks.map((t) =>
+          t.id === draggedTask.id ? { ...t, status: nextStatus } : t
+        );
+      }
+      return updated;
+    });
     setActiveTask(null);
+
+    api.patch(
+      `/workspaces/${workspaceId}/projects/${project.id}/lists/${draggedTask.list_id}/tasks/${draggedTask.id}`,
+      { status: nextStatus }
+    ).then(() => fetchAllTasks());
   };
 
   return (
     <DndContext
+      sensors={sensors}
       onDragStart={(event) => setActiveTask(event?.active?.data?.current?.task || null)}
       onDragCancel={() => setActiveTask(null)}
       onDragEnd={handleDragEnd}

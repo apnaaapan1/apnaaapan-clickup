@@ -83,10 +83,13 @@ const getMyTasks = async (req, res) => {
          t.*,
          l.name AS list_name,
          p.id AS project_id,
-         p.name AS project_name
+         p.name AS project_name,
+         u.name AS assignee_name,
+         u.avatar_url AS assignee_avatar
        FROM tasks t
        JOIN lists l ON t.list_id = l.id
        JOIN projects p ON l.project_id = p.id
+       LEFT JOIN users u ON t.assignee_id = u.id
        WHERE p.workspace_id = $1
          AND t.assignee_id = $2
          AND t.parent_task_id IS NULL

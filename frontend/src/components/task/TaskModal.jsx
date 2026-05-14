@@ -71,7 +71,7 @@ export default function TaskModal({ taskId, listId, projectId, onClose, onRefetc
                 onBlur={() => {
                   if (title.trim() && title !== task?.title) updateTask({ title: title.trim() });
                 }}
-                className="w-full text-[22px] font-semibold text-gray-900 outline-none border-b border-transparent focus:border-gray-200 pb-1"
+                className="w-full text-[22px] font-semibold text-gray-900 outline-none border-b border-gray-200 pb-1 focus:border-gray-300"
                 placeholder="Task name"
               />
             </section>

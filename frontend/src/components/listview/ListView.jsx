@@ -2,18 +2,45 @@ import { useEffect, useState } from 'react';
 import api from '../../api/axios';
 import { useAuth } from '../../context/AuthContext';
 import ListViewRow from './ListViewRow';
-import ListBulletIcon from '../icons/ListBulletIcon';
 
-const groupColors = ['#6366f1', '#3b82f6', '#0ea5e9', '#22c55e', '#f59e0b', '#ef4444'];
+const statusSections = [
+  {
+    key: 'inProgress',
+    label: 'IN PROGRESS',
+    createStatus: 'in_progress',
+    dotColor: '#3b82f6',
+    badgeBg: 'bg-blue-600',
+    badgeText: 'text-white',
+    iconBg: 'bg-blue-600',
+  },
+  {
+    key: 'todo',
+    label: 'TO DO',
+    createStatus: 'todo',
+    dotColor: '#9ca3af',
+    badgeBg: 'bg-gray-100',
+    badgeText: 'text-gray-600',
+    iconBg: 'bg-gray-400',
+  },
+  {
+    key: 'completed',
+    label: 'COMPLETE',
+    createStatus: 'done',
+    dotColor: '#22c55e',
+    badgeBg: 'bg-emerald-600',
+    badgeText: 'text-white',
+    iconBg: 'bg-emerald-600',
+  },
+];
 
 export default function ListView({ project, lists, onRefetch, onOpenTask }) {
   const { workspaceId } = useAuth();
   const [tasksByList, setTasksByList] = useState({});
-  const [collapsed, setCollapsed] = useState({});
+  const [collapsedSections, setCollapsedSections] = useState({});
   const [addingTarget, setAddingTarget] = useState(null);
   const [taskTitle, setTaskTitle] = useState('');
   const [creatingTask, setCreatingTask] = useState(false);
- 
+
   const fetchAllTasks = async () => {
     if (!workspaceId || !project?.id) return;
     const entries = await Promise.all(
@@ -47,15 +74,24 @@ export default function ListView({ project, lists, onRefetch, onOpenTask }) {
     if (!title || creatingTask) return;
     setCreatingTask(true);
     try {
-      await api.post(`/workspaces/${workspaceId}/projects/${project.id}/lists/${listId}/tasks`, {
+      const res = await api.post(`/workspaces/${workspaceId}/projects/${project.id}/lists/${listId}/tasks`, {
         title,
         priority: 'medium',
         status,
       });
+
+      const newTask = res.data?.task;
+      if (newTask) {
+        setTasksByList((prev) => ({
+          ...prev,
+          [listId]: [...(prev[listId] || []), newTask],
+        }));
+      }
+
       setTaskTitle('');
       setAddingTarget(null);
-      await fetchAllTasks();
-      onRefetch();
+
+      fetchAllTasks();
     } finally {
       setCreatingTask(false);
     }
@@ -85,6 +121,10 @@ export default function ListView({ project, lists, onRefetch, onOpenTask }) {
     return { inProgress, todo, completed };
   };
 
+  const toggleSection = (sectionId) => {
+    setCollapsedSections((prev) => ({ ...prev, [sectionId]: !prev[sectionId] }));
+  };
+
   if (!lists.length) {
     return (
       <div className="p-6">
@@ -95,138 +135,137 @@ export default function ListView({ project, lists, onRefetch, onOpenTask }) {
     );
   }
 
-  return (
-    <div className="p-6">
-      <div className="bg-white border border-gray-200 rounded-xl overflow-hidden">
-        <div className="sticky top-0 bg-white border-b border-[#e5e7eb] px-4 py-2.5 z-10">
-          <div className="flex items-center gap-4 text-[14px] uppercase text-gray-500 font-semibold tracking-wide">
-            <div className="flex-1">Task name</div>
-            <div className="w-[108px] text-center">Assignee</div>
-            <div className="w-[118px]">Due date</div>
-            <div className="w-[112px]">Priority</div>
-            <div className="w-[128px]">Status</div>
-          </div>
-        </div>
+  const allTasks = lists.flatMap((list) => tasksByList[list.id] || []);
+  const groupedTasks = splitTasksByDefaultOrder(allTasks);
 
-        {lists.map((list, idx) => {
-          const tasks = tasksByList[list.id] || [];
-          const groupedTasks = splitTasksByDefaultOrder(tasks);
-          const isCollapsed = collapsed[list.id];
-          return (
-            <div key={list.id} className={idx > 0 ? 'mt-3 border-t border-gray-200/80' : ''}>
+  return (
+    <div className="px-6 py-4 bg-white">
+      {statusSections.map((section) => {
+        const items = groupedTasks[section.key] || [];
+        const sectionId = section.key;
+        const isCollapsed = collapsedSections[sectionId];
+
+        return (
+          <div key={sectionId} className="mb-6">
+            {/* Section header row */}
+            <div className="flex items-center gap-2 mb-1 px-1">
               <button
-                onClick={() =>
-                  setCollapsed((prev) => ({ ...prev, [list.id]: !prev[list.id] }))
-                }
-                className="w-full px-4 py-3.5 text-left border-b border-gray-100 bg-gray-50/60 flex items-center gap-2.5 min-w-0"
-                style={{ borderLeft: `4px solid ${groupColors[idx % groupColors.length]}` }}
+                type="button"
+                onClick={() => toggleSection(sectionId)}
+                className="p-0.5 text-gray-400 hover:text-gray-600 transition-transform"
               >
-                <ListBulletIcon className="w-5 h-5 shrink-0 text-gray-500" />
-                <span className="font-bold text-lg text-gray-900 truncate min-w-0">{list.name}</span>
+                <svg
+                  className={`w-3.5 h-3.5 transition-transform duration-200 ${isCollapsed ? '-rotate-90' : ''}`}
+                  fill="currentColor"
+                  viewBox="0 0 20 20"
+                >
+                  <path d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" />
+                </svg>
               </button>
 
-              {!isCollapsed && (
-                <>
-                  {[
-                    {
-                      key: 'inProgress',
-                      label: 'In Progress',
-                      items: groupedTasks.inProgress,
-                      createStatus: 'in_progress',
-                      badgeClass: 'text-blue-700 bg-blue-50 border-blue-200',
-                    },
-                    {
-                      key: 'todo',
-                      label: 'To Do',
-                      items: groupedTasks.todo,
-                      createStatus: 'todo',
-                      badgeClass: 'text-amber-700 bg-amber-50 border-amber-200',
-                    },
-                    {
-                      key: 'completed',
-                      label: 'Completed',
-                      items: groupedTasks.completed,
-                      createStatus: 'done',
-                      badgeClass: 'text-emerald-700 bg-emerald-50 border-emerald-200',
-                    },
-                  ].map((section) => (
-                    <div key={`${list.id}-${section.key}`}>
-                      <div className="px-4 py-2.5 border-b border-[#f3f4f6] bg-gray-50/50">
-                        <p
-                          className={`inline-flex items-center gap-2 px-3 py-1 rounded-full border text-[13px] font-semibold uppercase tracking-wide ${section.badgeClass}`}
-                        >
-                          <span>{section.label}</span>
-                          <span>{section.items.length}</span>
-                        </p>
-                      </div>
-                      {section.items.map((task) => (
-                        <ListViewRow
-                          key={task.id}
-                          task={task}
-                          projectId={project.id}
-                          onRefetch={async () => {
-                            await fetchAllTasks();
-                            onRefetch();
-                          }}
-                          onOpenTask={onOpenTask}
-                        />
-                      ))}
-                      <div className="px-4 py-2 border-b border-[#f3f4f6]">
-                        {addingTarget?.listId === list.id && addingTarget?.sectionKey === section.key ? (
-                          <div className="space-y-2">
-                            <input
-                              autoFocus
-                              value={taskTitle}
-                              onChange={(e) => setTaskTitle(e.target.value)}
-                              onKeyDown={(e) => {
-                                if (e.key === 'Escape') {
-                                  handleCancelCreateTask();
-                                }
-                                if (e.key === 'Enter') {
-                                  handleCreateTask(list.id, taskTitle, section.createStatus);
-                                }
-                              }}
-                              placeholder="Task name..."
-                              className="w-full px-3 py-2.5 rounded-lg border border-gray-200 text-[15px]"
-                            />
-                            <div className="flex items-center justify-end gap-2">
-                              <button
-                                type="button"
-                                onClick={handleCancelCreateTask}
-                                className="px-3 py-2 rounded-lg border border-gray-200 text-sm font-medium text-gray-600 hover:bg-gray-50"
-                              >
-                                Cancel
-                              </button>
-                              <button
-                                type="button"
-                                onClick={() => handleCreateTask(list.id, taskTitle, section.createStatus)}
-                                disabled={!taskTitle.trim() || creatingTask}
-                                className="px-3 py-2 rounded-lg bg-violet-600 text-white text-sm font-medium hover:bg-violet-700 disabled:opacity-60 disabled:pointer-events-none"
-                              >
-                                {creatingTask ? 'Saving...' : 'Save'}
-                              </button>
-                            </div>
-                          </div>
-                        ) : (
-                          <button
-                            onClick={() => {
-                              setAddingTarget({ listId: list.id, sectionKey: section.key });
-                              setTaskTitle('');
-                            }}
-                            className="text-[15px] font-medium text-gray-600 hover:text-gray-800"
-                          >
-                            + Add task
-                          </button>
-                        )}
-                      </div>
-                    </div>
-                  ))}
-                </>
-              )}
+              <span
+                className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded text-[12px] font-bold tracking-wider ${section.badgeBg} ${section.badgeText}`}
+              >
+                <span
+                  className={`w-[14px] h-[14px] rounded-full border-2 border-current flex items-center justify-center`}
+                >
+                  {section.key === 'inProgress' && (
+                    <svg className="w-2 h-2" fill="currentColor" viewBox="0 0 16 16">
+                      <circle cx="8" cy="4" r="1.5" />
+                      <circle cx="8" cy="8" r="1.5" />
+                      <circle cx="8" cy="12" r="1.5" />
+                    </svg>
+                  )}
+                  {section.key === 'completed' && (
+                    <svg className="w-2 h-2" fill="none" stroke="currentColor" strokeWidth="3" viewBox="0 0 16 16">
+                      <path d="M3 8l3.5 3.5L13 4" />
+                    </svg>
+                  )}
+                </span>
+                {section.label}
+              </span>
+
+              <span className="text-sm font-medium text-gray-400 ml-1">{items.length}</span>
             </div>
-          );
-        })}
-      </div>
+
+            {!isCollapsed && (
+              <>
+                {/* Column headers */}
+                <div className="flex items-center px-4 py-2 text-[13px] font-medium text-gray-400 border-b border-gray-100">
+                  <div className="flex-1 pl-7">Name</div>
+                  <div className="w-[130px] text-center">Assignee</div>
+                  <div className="w-[130px]">Due date</div>
+                  <div className="w-[130px]">Priority</div>
+                </div>
+
+                {/* Task rows */}
+                {items.map((task) => (
+                  <ListViewRow
+                    key={task.id}
+                    task={task}
+                    projectId={project.id}
+                    sectionColor={section.dotColor}
+                    sectionKey={section.key}
+                    onRefetch={fetchAllTasks}
+                    onOpenTask={onOpenTask}
+                  />
+                ))}
+
+                {/* Add task row */}
+                <div className="px-4 py-2">
+                  {addingTarget === sectionId ? (
+                    <div className="flex items-center gap-2 pl-7">
+                      <input
+                        autoFocus
+                        value={taskTitle}
+                        onChange={(e) => setTaskTitle(e.target.value)}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Escape') handleCancelCreateTask();
+                          if (e.key === 'Enter') {
+                            const listId = lists[0]?.id;
+                            if (listId) handleCreateTask(listId, taskTitle, section.createStatus);
+                          }
+                        }}
+                        placeholder="Task name..."
+                        className="flex-1 px-3 py-1.5 rounded border border-gray-200 text-[14px] outline-none focus:border-gray-300"
+                      />
+                      <button
+                        type="button"
+                        onClick={handleCancelCreateTask}
+                        className="px-3 py-1.5 rounded text-sm text-gray-500 hover:bg-gray-100"
+                      >
+                        Cancel
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const listId = lists[0]?.id;
+                          if (listId) handleCreateTask(listId, taskTitle, section.createStatus);
+                        }}
+                        disabled={!taskTitle.trim() || creatingTask}
+                        className="px-3 py-1.5 rounded bg-violet-600 text-white text-sm hover:bg-violet-700 disabled:opacity-60"
+                      >
+                        {creatingTask ? 'Saving...' : 'Save'}
+                      </button>
+                    </div>
+                  ) : (
+                    <button
+                      onClick={() => {
+                        setAddingTarget(sectionId);
+                        setTaskTitle('');
+                      }}
+                      className="text-[14px] text-gray-400 hover:text-gray-600 pl-7 flex items-center gap-1.5 py-1"
+                    >
+                      <span className="text-[16px] leading-none">+</span>
+                      <span>Add Task</span>
+                    </button>
+                  )}
+                </div>
+              </>
+            )}
+          </div>
+        );
+      })}
     </div>
   );
 }
