@@ -12,6 +12,7 @@ import WorkInProgressPage from './pages/WorkInProgressPage';
 import InboxPage from './pages/InboxPage';
 import ProfilePage from './pages/ProfilePage';
 import MyTasksPage from './pages/MyTasksPage';
+import AllPeoplePage from './pages/AllPeoplePage';
 
 function App() {
   return (
@@ -38,6 +39,9 @@ function App() {
                 element={<div className="p-6">Task detail coming soon</div>}
               />
               <Route path="/workspace" element={<WorkspaceSettings />} />
+              <Route path="/teams/people" element={<AllPeoplePage />} />
+              <Route path="/teams/all" element={<WorkInProgressPage title="All Teams" />} />
+              <Route path="/teams/analytics" element={<WorkInProgressPage title="Analytics" />} />
             </Route>
           </Route>
         </Routes>

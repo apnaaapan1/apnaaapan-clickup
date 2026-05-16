@@ -259,12 +259,12 @@ const updateMemberRole = async (req, res) => {
 };
 
 const removeMember = async (req, res) => {
-  const { memberId } = req.params;
+  const { workspaceId, memberId } = req.params;
 
   try {
     const memberResult = await pool.query(
-      'SELECT * FROM workspace_members WHERE id = $1',
-      [memberId]
+      'SELECT * FROM workspace_members WHERE id = $1 AND workspace_id = $2',
+      [memberId, workspaceId]
     );
 
     if (memberResult.rows.length === 0) {
@@ -275,7 +275,10 @@ const removeMember = async (req, res) => {
       return res.status(403).json({ success: false, message: 'Cannot remove the workspace owner' });
     }
 
-    await pool.query('DELETE FROM workspace_members WHERE id = $1', [memberId]);
+    await pool.query(
+      'DELETE FROM workspace_members WHERE id = $1 AND workspace_id = $2',
+      [memberId, workspaceId]
+    );
 
     return res.status(200).json({ success: true, message: 'Member removed' });
   } catch (err) {

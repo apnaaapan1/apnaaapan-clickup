@@ -109,28 +109,35 @@ export default function AppLayout() {
     return () => window.removeEventListener('lists:changed', onListsChanged);
   }, [loadSidebarLists]);
 
-  useEffect(() => {
-    const loadWorkspace = async () => {
-      if (!workspaceId) return;
-      try {
-        const res = await api.get(`/workspaces/${workspaceId}`);
-        if (res.data?.workspace?.name) {
-          setWorkspaceName(res.data.workspace.name);
-        }
-        const members = res.data?.workspace?.members || [];
-        setMemberCount(members.length);
-        const myMembership = members.find(
-          (member) => member.email === user?.email
-        );
-        if (myMembership?.role) {
-          setCurrentUserRole(myMembership.role);
-        }
-      } catch {
-        // Keep fallback workspace name.
+  const reloadWorkspaceMeta = useCallback(async () => {
+    if (!workspaceId) return;
+    try {
+      const res = await api.get(`/workspaces/${workspaceId}`);
+      if (res.data?.workspace?.name) {
+        setWorkspaceName(res.data.workspace.name);
       }
-    };
-    loadWorkspace();
+      const members = res.data?.workspace?.members || [];
+      setMemberCount(members.length);
+      const myMembership = members.find((member) => member.email === user?.email);
+      if (myMembership?.role) {
+        setCurrentUserRole(myMembership.role);
+      }
+      window.dispatchEvent(new Event('workspace:members-changed'));
+    } catch {
+      // Keep fallback workspace name.
+    }
   }, [workspaceId, user?.email]);
+
+  useEffect(() => {
+    reloadWorkspaceMeta();
+  }, [reloadWorkspaceMeta]);
+
+  useEffect(() => {
+    if (location.pathname.startsWith('/teams')) {
+      setActiveRail('teams');
+      setSecondaryRailOpen(true);
+    }
+  }, [location.pathname]);
 
   useEffect(() => {
     const onProjectsChanged = () => refetch();
@@ -430,6 +437,7 @@ export default function AppLayout() {
           onClick={() => {
             setActiveRail('teams');
             setSecondaryRailOpen(true);
+            navigate('/teams/people');
           }}
           className={`${railBtn} ${activeRail === 'teams' ? railActive : railInactive}`}
           title="Teams"
@@ -1055,7 +1063,10 @@ export default function AppLayout() {
       <InviteModal
         isOpen={inviteOpen}
         onClose={() => setInviteOpen(false)}
-        onInvited={refetch}
+        onInvited={() => {
+          refetch();
+          reloadWorkspaceMeta();
+        }}
         canInvite={currentUserRole === 'owner' || currentUserRole === 'admin'}
       />
       <CreateSpaceModal

@@ -8,6 +8,17 @@ const roles = [
   { value: 'viewer', label: 'Viewer', description: 'Can view shared items with limited permissions.' },
 ];
 
+function UserIcon({ className = 'w-4 h-4' }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="none" aria-hidden="true">
+      <path
+        d="M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8Zm0 2c-4.418 0-8 2.015-8 4.5V20a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-1.5C20 16.015 16.418 14 12 14Z"
+        fill="currentColor"
+      />
+    </svg>
+  );
+}
+
 export default function InviteModal({ isOpen, onClose, onInvited, canInvite }) {
   const { workspaceId } = useAuth();
   const [emails, setEmails] = useState('');
@@ -71,40 +82,67 @@ export default function InviteModal({ isOpen, onClose, onInvited, canInvite }) {
   };
 
   return (
-    <div className="fixed inset-0 z-[80] bg-black/40 flex items-center justify-center p-4">
-      <div className="w-full max-w-[620px] rounded-2xl bg-white shadow-xl">
-        <div className="px-6 pt-6 pb-2 flex items-start justify-between">
-          <h2 className="text-4xl font-semibold text-gray-900">Invite people</h2>
-          <button onClick={onClose} className="w-9 h-9 rounded-full bg-gray-100 text-gray-500 hover:bg-gray-200">
+    <div
+      className="fixed inset-0 z-[80] flex items-center justify-center bg-black/40 p-4"
+      onClick={onClose}
+      role="presentation"
+    >
+      <div
+        className="w-full max-w-lg rounded-2xl border border-gray-100 bg-white shadow-2xl"
+        onClick={(e) => e.stopPropagation()}
+        role="dialog"
+        aria-labelledby="invite-modal-title"
+        aria-modal="true"
+      >
+        <div className="flex items-start justify-between px-6 pt-5 pb-1">
+          <h2 id="invite-modal-title" className="text-lg font-semibold text-gray-900">
+            Invite people
+          </h2>
+          <button
+            type="button"
+            onClick={onClose}
+            className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-gray-100 text-sm text-gray-500 transition-colors hover:bg-gray-200 hover:text-gray-700"
+            aria-label="Close"
+          >
             ✕
           </button>
         </div>
 
-        <div className="px-6 pb-6">
-          <label className="text-xl text-gray-700 font-medium">Invite by email</label>
+        <div className="px-6 pb-4">
+          <label className="mt-4 block text-sm font-medium text-gray-700" htmlFor="invite-emails">
+            Invite by email
+          </label>
           <input
+            id="invite-emails"
             type="text"
             value={emails}
             onChange={(e) => setEmails(e.target.value)}
             placeholder="Email, comma or space separated"
-            className="mt-2 w-full h-12 px-4 rounded-xl border border-gray-300 text-lg outline-none focus:ring-2 focus:ring-violet-500/30"
+            className="mt-1.5 w-full rounded-lg border border-gray-200 px-3 py-2 text-[15px] text-gray-900 placeholder:text-gray-400 outline-none focus:border-violet-500 focus:ring-2 focus:ring-violet-500/20"
           />
 
-          <div className="mt-6">
-            <label className="text-xl text-gray-700 font-medium">Invite as</label>
-            <div className="mt-2 rounded-xl border border-gray-200 p-3 flex items-start gap-3">
-              <div className="w-12 h-12 rounded-lg bg-gray-100 text-gray-600 flex items-center justify-center text-xl">👤</div>
-              <div className="flex-1 min-w-0 relative" ref={roleRef}>
+          <div className="mt-5">
+            <span className="block text-sm font-medium text-gray-700">Invite as</span>
+            <div className="mt-1.5 flex items-start gap-2.5 rounded-lg border border-gray-200 p-2.5">
+              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md bg-violet-50 text-violet-600">
+                <UserIcon />
+              </div>
+              <div className="relative min-w-0 flex-1" ref={roleRef}>
                 <button
                   type="button"
                   onClick={() => setRoleOpen((prev) => !prev)}
-                  className="w-full flex items-center justify-between text-2xl font-medium text-gray-900 bg-transparent outline-none"
+                  className="flex w-full items-center justify-between gap-2 rounded-md bg-transparent text-left outline-none"
                 >
-                  <span>{selectedRole.label}</span>
-                  <span className="text-sm text-gray-500">▾</span>
+                  <span className="text-sm font-semibold text-gray-900">{selectedRole.label}</span>
+                  <span
+                    className={`shrink-0 text-xs text-gray-400 transition-transform ${roleOpen ? 'rotate-180' : ''}`}
+                    aria-hidden
+                  >
+                    ▾
+                  </span>
                 </button>
                 {roleOpen && (
-                  <div className="absolute left-0 right-0 mt-2 rounded-lg border border-gray-200 bg-white shadow-md z-10 overflow-hidden">
+                  <div className="absolute left-0 right-0 z-10 mt-1.5 overflow-hidden rounded-lg border border-gray-200 bg-white shadow-lg">
                     {roles.map((r) => (
                       <button
                         key={r.value}
@@ -113,38 +151,52 @@ export default function InviteModal({ isOpen, onClose, onInvited, canInvite }) {
                           setRole(r.value);
                           setRoleOpen(false);
                         }}
-                        className={`w-full text-left px-3 py-2 text-sm hover:bg-gray-50 ${
-                          role === r.value ? 'bg-violet-50 text-violet-700' : 'text-gray-700'
+                        className={`w-full border-b border-gray-100 px-3 py-2.5 text-left last:border-b-0 hover:bg-gray-50 ${
+                          role === r.value ? 'bg-violet-50' : ''
                         }`}
                       >
-                        {r.label}
+                        <span
+                          className={`block text-sm font-medium ${
+                            role === r.value ? 'text-violet-700' : 'text-gray-900'
+                          }`}
+                        >
+                          {r.label}
+                        </span>
+                        <span className="mt-0.5 block text-xs leading-snug text-gray-500">{r.description}</span>
                       </button>
                     ))}
                   </div>
                 )}
-                <p className="text-base text-gray-500 mt-1">{selectedRole.description}</p>
+                <p className="mt-0.5 text-xs leading-snug text-gray-500">{selectedRole.description}</p>
               </div>
             </div>
           </div>
 
           {!canInvite && (
-            <p className="text-sm text-amber-700 mt-3">You do not have permission to invite people. Only owner/admin can invite.</p>
+            <p className="mt-3 text-sm text-amber-700">
+              You do not have permission to invite people. Only owner/admin can invite.
+            </p>
           )}
-          {error && <p className="text-sm text-red-500 mt-3">{error}</p>}
-          {message && <p className="text-sm text-green-600 mt-3">{message}</p>}
+          {error && <p className="mt-3 text-sm text-red-600">{error}</p>}
+          {message && <p className="mt-3 text-sm text-green-600">{message}</p>}
+        </div>
 
-          <div className="mt-8 flex items-center justify-end gap-6">
-            <button onClick={onClose} className="text-2xl text-gray-600 hover:text-gray-800">
-              Cancel
-            </button>
-            <button
-              onClick={handleSubmit}
-              disabled={loading || !canInvite}
-              className="h-14 px-7 rounded-xl bg-violet-600 text-white text-2xl font-semibold hover:bg-violet-700 disabled:opacity-60"
-            >
-              {loading ? 'Sending...' : 'Send invite'}
-            </button>
-          </div>
+        <div className="flex items-center justify-end gap-2 border-t border-gray-100 px-6 py-4">
+          <button
+            type="button"
+            onClick={onClose}
+            className="rounded-lg px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
+          >
+            Cancel
+          </button>
+          <button
+            type="button"
+            onClick={handleSubmit}
+            disabled={loading || !canInvite}
+            className="rounded-lg bg-violet-600 px-4 py-2 text-sm font-semibold text-white hover:bg-violet-700 disabled:opacity-50"
+          >
+            {loading ? 'Sending...' : 'Send invite'}
+          </button>
         </div>
       </div>
     </div>
