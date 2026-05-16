@@ -503,20 +503,17 @@ export default function AppLayout() {
 
         <aside
           className={`h-full bg-white border-r border-gray-200 flex flex-col relative overflow-hidden transition-[width] duration-200 ease-out shrink-0 ${
-            secondaryRailOpen ? 'w-[330px]' : 'w-0 border-r-0'
+            secondaryRailOpen ? 'w-[310px]' : 'w-0 border-r-0'
           }`}
         >
         {activeRail === 'home' && secondaryRailOpen && (
           <>
-        <div className="px-4 pt-3 pb-2 flex justify-end border-b border-gray-200 shrink-0 bg-white">
-          <SidebarCollapseButton onClick={() => setSecondaryRailOpen(false)} />
-        </div>
-        <div className="px-4 py-3 border-b border-gray-200" ref={workspaceMenuRef}>
-          <div className="flex items-center gap-2">
+        <div className="relative px-3 py-2.5 border-b border-gray-200 shrink-0 bg-white" ref={workspaceMenuRef}>
+          <div className="flex items-center gap-1.5">
             <button
               type="button"
               onClick={() => setWorkspaceMenuOpen((prev) => !prev)}
-              className="flex-1 h-9 rounded-lg border border-gray-200 px-2.5 flex items-center gap-2 hover:bg-gray-50 text-left"
+              className="flex-1 min-w-0 h-8 rounded-md border border-gray-200 px-2 flex items-center gap-2 hover:bg-gray-50 text-left"
               aria-expanded={workspaceMenuOpen}
               aria-haspopup="true"
               aria-label={workspaceMenuOpen ? 'Collapse workspace menu' : 'Expand workspace menu'}
@@ -524,7 +521,7 @@ export default function AppLayout() {
               <div className="w-6 h-6 rounded-full bg-indigo-100 text-indigo-700 flex items-center justify-center text-xs font-semibold shrink-0">
                 {workspaceInitial}
               </div>
-              <span className="text-[14px] font-semibold text-gray-800 truncate">{workspaceName}</span>
+              <span className="text-sm font-semibold text-gray-800 truncate">{workspaceName}</span>
               <svg
                 className={`w-4 h-4 text-gray-600 ml-auto shrink-0 transition-transform duration-200 ease-out ${
                   workspaceMenuOpen ? 'rotate-180' : ''
@@ -540,10 +537,11 @@ export default function AppLayout() {
                 />
               </svg>
             </button>
+            <SidebarCollapseButton onClick={() => setSecondaryRailOpen(false)} />
           </div>
 
           {workspaceMenuOpen && (
-            <div className="absolute left-3 right-3 top-[56px] z-40 bg-white rounded-xl border border-gray-200 shadow-lg p-3">
+            <div className="absolute left-2 right-2 top-[52px] z-40 bg-white rounded-xl border border-gray-200 shadow-lg p-3">
               <div className="flex items-center gap-3 pb-3 border-b border-gray-100">
                 <div className="w-10 h-10 rounded-full bg-indigo-100 text-indigo-700 flex items-center justify-center text-base font-semibold">
                   {workspaceInitial}
@@ -582,24 +580,28 @@ export default function AppLayout() {
           )}
         </div>
 
-        <div className="px-4 py-4 flex-1 min-h-0 overflow-y-auto overflow-x-hidden">
-          <div className="flex items-center justify-between">
-            <h2 className="text-[32px] leading-none font-semibold text-gray-900">Home</h2>
-            <button className="h-10 px-4 rounded-xl bg-violet-600 text-white font-semibold hover:bg-violet-700">
+        <div className="sidebar-scroll px-3 py-3 flex-1 min-h-0 overflow-y-auto overflow-x-hidden">
+          <div className="flex items-center justify-between gap-2 mb-2">
+            <h2 className="text-base font-semibold text-gray-900">Home</h2>
+            <button
+              type="button"
+              onClick={() => setCreateSpaceModalOpen(true)}
+              className="shrink-0 rounded-md bg-violet-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-violet-700"
+            >
               + Create
             </button>
           </div>
 
-          <div className="mt-5 space-y-2 text-gray-700">
-            <NavLink to="/inbox" className={({ isActive }) => `block px-2 py-1.5 rounded text-[15px] ${isActive ? 'bg-gray-100 font-semibold text-gray-900' : 'hover:bg-gray-50 font-medium text-gray-700'}`}>Inbox</NavLink>
-            <NavLink to="/replies" className={({ isActive }) => `block px-2 py-1.5 rounded text-[15px] ${isActive ? 'bg-gray-100 font-semibold text-gray-900' : 'hover:bg-gray-50 font-medium text-gray-700'}`}>Replies</NavLink>
-            <NavLink to="/my-tasks" className={({ isActive }) => `block px-2 py-1.5 rounded text-[15px] ${isActive ? 'bg-gray-100 font-semibold text-gray-900' : 'hover:bg-gray-50 font-medium text-gray-700'}`}>My Tasks</NavLink>
-          </div>
+          <nav className="space-y-0.5 text-sm text-gray-700">
+            <NavLink to="/inbox" className={({ isActive }) => `block px-2 py-1.5 rounded-md ${isActive ? 'bg-gray-100 font-medium text-gray-900' : 'hover:bg-gray-50 text-gray-700'}`}>Inbox</NavLink>
+            <NavLink to="/replies" className={({ isActive }) => `block px-2 py-1.5 rounded-md ${isActive ? 'bg-gray-100 font-medium text-gray-900' : 'hover:bg-gray-50 text-gray-700'}`}>Replies</NavLink>
+            <NavLink to="/my-tasks" className={({ isActive }) => `block px-2 py-1.5 rounded-md ${isActive ? 'bg-gray-100 font-medium text-gray-900' : 'hover:bg-gray-50 text-gray-700'}`}>My Tasks</NavLink>
+          </nav>
 
-          <div className="mt-6 pt-4 border-t border-gray-200">
+          <div className="mt-4 pt-3 border-t border-gray-200">
             <div className="mb-2 flex items-center justify-between gap-2 rounded-lg px-2 py-1.5 -mx-2 group hover:bg-gray-100/90 transition-colors">
               <div className="flex items-center gap-1 min-w-0">
-                <p className="text-[15px] font-semibold text-gray-600 shrink-0">Spaces</p>
+                <p className="text-[13px] font-semibold uppercase tracking-wide text-gray-500 shrink-0">Spaces</p>
                 <button
                   type="button"
                   onClick={() => setSpacesSectionExpanded((v) => !v)}
@@ -631,7 +633,7 @@ export default function AppLayout() {
                 <div className="relative shrink-0" data-spaces-section-menu>
                   <button
                     type="button"
-                    className="w-9 h-9 rounded-md text-gray-500 hover:bg-gray-200/80 hover:text-gray-700 flex items-center justify-center text-xl leading-none tracking-wide focus-visible:ring-2 focus-visible:ring-violet-400/50"
+                    className="w-7 h-7 rounded-md text-gray-500 hover:bg-gray-200/80 hover:text-gray-700 flex items-center justify-center text-base leading-none focus-visible:ring-2 focus-visible:ring-violet-400/50"
                     title="Spaces options"
                     aria-expanded={spacesSectionMenuOpen}
                     aria-haspopup="menu"
@@ -675,7 +677,7 @@ export default function AppLayout() {
                 <button
                   type="button"
                   onClick={() => setCreateSpaceModalOpen(true)}
-                  className="w-9 h-9 rounded-md border border-gray-200 bg-gray-50 text-gray-600 hover:bg-gray-100 hover:text-gray-800 flex items-center justify-center text-xl font-semibold leading-none focus-visible:ring-2 focus-visible:ring-violet-400/50"
+                  className="w-7 h-7 rounded-md border border-gray-200 bg-gray-50 text-gray-600 hover:bg-gray-100 hover:text-gray-800 flex items-center justify-center text-base font-semibold leading-none focus-visible:ring-2 focus-visible:ring-violet-400/50"
                   title="Add Space"
                 >
                   +
@@ -687,8 +689,8 @@ export default function AppLayout() {
                 <NavLink
                   to="/spaces/manage"
                   className={({ isActive }) =>
-                    `block px-2 py-1.5 rounded text-[15px] ${
-                      isActive ? 'bg-gray-100 font-semibold text-gray-900' : 'hover:bg-gray-50 font-medium text-gray-700'
+                    `block px-2 py-1.5 rounded-md text-sm ${
+                      isActive ? 'bg-gray-100 font-medium text-gray-900' : 'hover:bg-gray-50 text-gray-700'
                     }`
                   }
                 >
@@ -735,7 +737,7 @@ export default function AppLayout() {
                             <span className="w-5 h-5 shrink-0 rounded bg-emerald-500 text-white text-[11px] flex items-center justify-center">
                               {(project.name || 'P').trim().charAt(0).toUpperCase()}
                             </span>
-                            <span className="truncate text-[15px] font-medium text-gray-900">{project.name}</span>
+                            <span className="truncate text-sm font-medium text-gray-900">{project.name}</span>
                           </button>
                           <div
                             className={`shrink-0 flex items-center gap-1 transition-opacity duration-150 group-focus-within:opacity-100 group-focus-within:pointer-events-auto ${
@@ -1027,7 +1029,7 @@ export default function AppLayout() {
                   <button
                     type="button"
                     onClick={() => setCreateSpaceModalOpen(true)}
-                    className="w-full text-left px-2 py-1.5 rounded hover:bg-gray-50 text-gray-500 text-[15px] font-medium"
+                    className="w-full text-left px-2 py-1.5 rounded-md hover:bg-gray-50 text-gray-500 text-sm font-medium"
                   >
                     + New Space
                   </button>
@@ -1036,9 +1038,9 @@ export default function AppLayout() {
             )}
           </div>
 
-          <div className="mt-6 pt-4 border-t border-gray-200">
-            <p className="text-[13px] font-semibold text-gray-600 mb-2">Channels</p>
-            <button className="w-full text-left px-2 py-1.5 rounded hover:bg-gray-50 text-gray-700">
+          <div className="mt-5 pt-3 border-t border-gray-200">
+            <p className="text-[13px] font-semibold uppercase tracking-wide text-gray-500 mb-1.5">Channels</p>
+            <button className="w-full text-left px-2 py-1.5 rounded-md hover:bg-gray-50 text-sm text-gray-700">
               + Add Channel <span className="text-xs text-gray-400 ml-2">Coming soon</span>
             </button>
           </div>
