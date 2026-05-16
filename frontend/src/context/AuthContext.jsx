@@ -12,6 +12,7 @@ export const useAuth = () => {
 };
 
 export const AuthProvider = ({ children }) => {
+  const navigate = useNavigate();
   const [user, setUser] = useState(null);
   const [accessToken, setAccessToken] = useState(null);
   const [workspaceId, setWorkspaceId] = useState(null);
@@ -55,7 +56,7 @@ export const AuthProvider = ({ children }) => {
     setAccessToken(null);
     setWorkspaceId(null);
     setIsAuthenticated(false);
-    window.location.href = '/login';
+    navigate('/login', { replace: true });
   };
 
   return (
