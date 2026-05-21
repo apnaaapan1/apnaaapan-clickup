@@ -47,8 +47,21 @@ const limiter = rateLimit({
 });
 app.use(limiter);
 
-app.get('/api/health', (req, res) => {
-  res.json({ status: 'ok', timestamp: new Date() });
+app.get('/', (req, res) => {
+  res.json({
+    name: 'Apnaaapan Clickup API',
+    status: 'running',
+    health: '/api/health',
+  });
+});
+
+app.get('/api/health', async (req, res) => {
+  try {
+    await pool.query('SELECT NOW()');
+    res.json({ status: 'ok', db: 'connected', timestamp: new Date() });
+  } catch (err) {
+    res.status(503).json({ status: 'error', db: 'disconnected', message: err.message });
+  }
 });
 
 app.use('/api/auth', authRoutes);
@@ -57,6 +70,9 @@ app.use('/api', projectRoutes);
 app.use('/api/notifications', notificationRoutes);
 
 app.use(errorMiddleware);
+
+/** Vercel (@vercel/node) runs this file as a serverless handler — export the app, do not listen. */
+module.exports = app;
 
 const start = async () => {
   try {
@@ -72,4 +88,6 @@ const start = async () => {
   });
 };
 
-start();
+if (!process.env.VERCEL) {
+  start();
+}
