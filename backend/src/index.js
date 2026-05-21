@@ -15,21 +15,47 @@ const app = express();
 const PORT = process.env.PORT || 5000;
 
 app.use(helmet());
-const allowedOrigins = [
-  process.env.CLIENT_URL,
-  'http://localhost:5171',
-  'http://localhost:5173',
-  'http://localhost:5174',
-].filter(Boolean);
+
+const normalizeOrigin = (url) => (url ? url.replace(/\/$/, '') : null);
+
+const allowedOrigins = new Set(
+  [
+    process.env.CLIENT_URL,
+    ...(process.env.ALLOWED_ORIGINS || '').split(','),
+    'http://localhost:5171',
+    'http://localhost:5173',
+    'http://localhost:5174',
+  ]
+    .map(normalizeOrigin)
+    .filter(Boolean)
+);
+
+/** On Vercel, allow any *.vercel.app frontend unless explicitly disabled (handy for preview URLs). */
+const allowVercelOrigins =
+  process.env.ALLOW_VERCEL_ORIGINS === 'true' ||
+  (process.env.ALLOW_VERCEL_ORIGINS !== 'false' && process.env.VERCEL);
+
+const isOriginAllowed = (origin) => {
+  if (!origin) return true;
+  if (allowedOrigins.has(normalizeOrigin(origin))) return true;
+  if (allowVercelOrigins) {
+    try {
+      return new URL(origin).hostname.endsWith('.vercel.app');
+    } catch {
+      return false;
+    }
+  }
+  return false;
+};
 
 app.use(
   cors({
     origin: (origin, callback) => {
-      // Allow Postman/curl (no browser origin) and known frontend origins.
-      if (!origin || allowedOrigins.includes(origin)) {
+      if (isOriginAllowed(origin)) {
         return callback(null, true);
       }
-      return callback(new Error('Not allowed by CORS'));
+      // Never pass Error here — that turns OPTIONS preflight into HTTP 500.
+      return callback(null, false);
     },
     credentials: true,
   })
