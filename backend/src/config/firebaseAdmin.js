@@ -8,7 +8,17 @@ const initializeFirebaseAdmin = () => {
   const projectId = process.env.FIREBASE_PROJECT_ID;
   if (!projectId) return null;
 
-  firebaseApp = admin.initializeApp({ projectId });
+  const serviceAccountJson = process.env.FIREBASE_SERVICE_ACCOUNT;
+  if (serviceAccountJson) {
+    const serviceAccount = JSON.parse(serviceAccountJson);
+    firebaseApp = admin.initializeApp({
+      credential: admin.credential.cert(serviceAccount),
+      projectId,
+    });
+  } else {
+    firebaseApp = admin.initializeApp({ projectId });
+  }
+
   return firebaseApp;
 };
 
