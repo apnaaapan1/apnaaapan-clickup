@@ -687,7 +687,7 @@ export default function AppLayout() {
             {spacesSectionExpanded && (
               <>
                 <NavLink
-                  to="/spaces/manage"
+                  to="/projects"
                   className={({ isActive }) =>
                     `block px-2 py-1.5 rounded-md text-sm ${
                       isActive ? 'bg-gray-100 font-medium text-gray-900' : 'hover:bg-gray-50 text-gray-700'

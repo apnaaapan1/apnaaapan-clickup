@@ -14,6 +14,11 @@ const notificationRoutes = require('./routes/notificationRoutes');
 const app = express();
 const PORT = process.env.PORT || 5000;
 
+/** Required on Vercel/reverse proxies so express-rate-limit reads client IP correctly. */
+if (process.env.VERCEL) {
+  app.set('trust proxy', 1);
+}
+
 app.use(helmet());
 
 const normalizeOrigin = (url) => (url ? url.replace(/\/$/, '') : null);

@@ -63,14 +63,14 @@ export default function AddTaskInput({ onSubmit, onCancel, disableOutsideClose =
 
   return (
     <div ref={panelRef} className="rounded-xl bg-white p-3 shadow-sm border border-gray-200">
-      <div className="flex items-start gap-2">
-        <input
+      <div className="flex items-center gap-3">
+      image.png        <input
           ref={inputRef}
           value={title}
           onChange={(e) => setTitle(e.target.value)}
           onKeyDown={handleKeyDown}
-          className="flex-1 min-w-0 text-[40px] leading-[1.1] font-semibold text-gray-800 placeholder:text-gray-500 outline-none"
-          placeholder="Task Name..."
+          className="flex-1 min-w-0 font-sans text-[20px] leading-snug font-semibold text-gray-900 placeholder:text-gray-400 placeholder:font-normal placeholder:tracking-normal outline-none bg-transparent cursor-text antialiased"
+          placeholder="Task name"
         />
         <button
           type="button"

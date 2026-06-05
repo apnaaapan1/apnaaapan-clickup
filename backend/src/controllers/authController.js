@@ -278,7 +278,14 @@ const googleAuth = async (req, res) => {
     });
   } catch (err) {
     console.error('Google auth error:', err.message);
-    return res.status(500).json({ success: false, message: 'Google login failed' });
+    const isDbError =
+      err.code === 'ENOTFOUND' ||
+      err.code === 'ECONNREFUSED' ||
+      /tenant\/user|getaddrinfo|connection terminated/i.test(err.message);
+    const message = isDbError
+      ? 'Database unavailable. Check Supabase project status and DATABASE_URL on Vercel.'
+      : 'Google login failed';
+    return res.status(isDbError ? 503 : 500).json({ success: false, message });
   }
 };
 
