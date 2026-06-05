@@ -64,7 +64,7 @@ export default function AddTaskInput({ onSubmit, onCancel, disableOutsideClose =
   return (
     <div ref={panelRef} className="rounded-xl bg-white p-3 shadow-sm border border-gray-200">
       <div className="flex items-center gap-3">
-      image.png        <input
+        <input
           ref={inputRef}
           value={title}
           onChange={(e) => setTitle(e.target.value)}
