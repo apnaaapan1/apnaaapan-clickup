@@ -17,3 +17,18 @@
 .sidebar-scroll::-webkit-scrollbar-thumb:hover {
   background-color: #9ca3af;
 }
+
+button:not(:disabled):not(.cursor-not-allowed),
+a[href],
+[role="button"]:not([aria-disabled="true"]):not(.cursor-not-allowed),
+[role="menuitem"],
+select:not(:disabled),
+summary {
+  cursor: pointer;
+}
+
+button:disabled,
+[aria-disabled="true"],
+.cursor-not-allowed {
+  cursor: not-allowed;
+}

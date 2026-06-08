@@ -2,7 +2,7 @@ import { NavLink } from 'react-router-dom';
 import SidebarCollapseButton from './SidebarCollapseButton';
 
 const navItemClass = ({ isActive }) =>
-  `w-full flex items-center gap-3 px-2 py-2 rounded-lg text-left text-gray-800 ${
+  `w-full flex items-center gap-3 px-2 py-2 rounded-lg text-left text-gray-800 cursor-pointer ${
     isActive ? 'bg-gray-100 font-medium' : 'hover:bg-gray-50'
   }`;
 

@@ -4,7 +4,7 @@ export default function SidebarCollapseButton({ onClick }) {
     <button
       type="button"
       onClick={onClick}
-      className="p-1.5 rounded-lg text-gray-600 hover:bg-gray-100 hover:text-gray-900"
+      className="p-1.5 rounded-lg text-gray-600 hover:bg-gray-100 hover:text-gray-900 cursor-pointer"
       title="Collapse sidebar"
       aria-label="Collapse sidebar"
     >

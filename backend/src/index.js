@@ -88,9 +88,14 @@ app.get('/', (req, res) => {
 
 app.get('/api/health', async (req, res) => {
   try {
-    await pool.query('SELECT NOW()');
-    res.json({ status: 'ok', db: 'connected', timestamp: new Date() });
+    const result = await pool.query('SELECT NOW() AS now');
+    res.json({
+      status: 'ok',
+      db: 'connected',
+      timestamp: result.rows[0]?.now || new Date(),
+    });
   } catch (err) {
+    console.error('Health check database error:', err.message);
     res.status(503).json({ status: 'error', db: 'disconnected', message: err.message });
   }
 });

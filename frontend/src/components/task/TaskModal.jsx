@@ -3,6 +3,9 @@ import { format } from 'date-fns';
 import api from '../../api/axios';
 import { useAuth } from '../../context/AuthContext';
 import useWorkspaceMembers from '../../hooks/useWorkspaceMembers';
+import DescriptionInput from './DescriptionInput';
+import PrioritySelect from './PrioritySelect';
+import StatusSelect from './StatusSelect';
 
 export default function TaskModal({ taskId, listId, projectId, onClose, onRefetch }) {
   const { workspaceId } = useAuth();
@@ -79,31 +82,17 @@ export default function TaskModal({ taskId, listId, projectId, onClose, onRefetc
             <section className="grid grid-cols-2 gap-4">
               <div>
                 <p className="text-xs font-medium text-gray-500 mb-1">Status</p>
-                <select
+                <StatusSelect
                   value={task?.status || 'todo'}
-                  onChange={(e) => updateTask({ status: e.target.value })}
-                  className="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-sm bg-white"
-                >
-                  <option value="todo">todo</option>
-                  <option value="in_progress">in_progress</option>
-                  <option value="in_review">in_review</option>
-                  <option value="done">done</option>
-                  <option value="cancelled">cancelled</option>
-                </select>
+                  onChange={(status) => updateTask({ status })}
+                />
               </div>
               <div>
                 <p className="text-xs font-medium text-gray-500 mb-1">Priority</p>
-                <select
+                <PrioritySelect
                   value={task?.priority || 'medium'}
-                  onChange={(e) => updateTask({ priority: e.target.value })}
-                  className="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-sm bg-white"
-                >
-                  <option value="urgent">urgent</option>
-                  <option value="high">high</option>
-                  <option value="medium">medium</option>
-                  <option value="low">low</option>
-                  <option value="none">none</option>
-                </select>
+                  onChange={(priority) => updateTask({ priority })}
+                />
               </div>
             </section>
 
@@ -146,7 +135,7 @@ export default function TaskModal({ taskId, listId, projectId, onClose, onRefetc
 
             <section>
               <p className="text-sm font-medium text-gray-700 mb-2">Description</p>
-              <textarea
+              <DescriptionInput
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
                 onBlur={() => {
@@ -155,7 +144,6 @@ export default function TaskModal({ taskId, listId, projectId, onClose, onRefetc
                   }
                 }}
                 placeholder="Add a description..."
-                className="w-full min-h-[120px] px-3 py-2 border border-gray-200 rounded-lg text-sm"
               />
             </section>
 

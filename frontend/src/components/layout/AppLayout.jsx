@@ -387,7 +387,11 @@ export default function AppLayout() {
   };
 
   const railBtn =
-    'flex flex-col items-center justify-center w-[52px] py-2 rounded-xl gap-0.5 text-[10px] font-medium transition-colors';
+    'flex flex-col items-center justify-center w-[52px] py-2 rounded-xl gap-0.5 text-[10px] font-medium transition-colors cursor-pointer';
+  const sidebarNavLinkClass = (isActive) =>
+    `block px-2 py-1.5 rounded-md cursor-pointer ${
+      isActive ? 'bg-gray-100 font-medium text-gray-900' : 'hover:bg-gray-50 text-gray-700'
+    }`;
   const railActive = 'bg-white text-indigo-900 shadow-sm';
   const railInactive = 'text-white hover:bg-white/10';
 
@@ -473,7 +477,7 @@ export default function AppLayout() {
         <NavLink
           to="/profile"
           className={({ isActive }) =>
-            `flex flex-col items-center justify-center w-[52px] py-2 rounded-xl gap-0.5 text-[10px] font-semibold overflow-hidden transition-colors ${
+            `flex flex-col items-center justify-center w-[52px] py-2 rounded-xl gap-0.5 text-[10px] font-semibold overflow-hidden transition-colors cursor-pointer ${
               isActive ? 'bg-white/25 ring-2 ring-white/40 text-white' : 'text-white hover:bg-white/10'
             }`
           }
@@ -491,7 +495,7 @@ export default function AppLayout() {
           <button
             type="button"
             onClick={() => setSecondaryRailOpen(true)}
-            className="shrink-0 w-7 flex flex-col items-center justify-center border-r border-gray-200 bg-gray-50 hover:bg-gray-100 text-gray-500 transition-colors"
+            className="shrink-0 w-7 flex flex-col items-center justify-center border-r border-gray-200 bg-gray-50 hover:bg-gray-100 text-gray-500 transition-colors cursor-pointer"
             title="Expand sidebar"
             aria-label="Expand sidebar"
           >
@@ -513,7 +517,7 @@ export default function AppLayout() {
             <button
               type="button"
               onClick={() => setWorkspaceMenuOpen((prev) => !prev)}
-              className="flex-1 min-w-0 h-8 rounded-md border border-gray-200 px-2 flex items-center gap-2 hover:bg-gray-50 text-left"
+              className="flex-1 min-w-0 h-8 rounded-md border border-gray-200 px-2 flex items-center gap-2 hover:bg-gray-50 text-left cursor-pointer"
               aria-expanded={workspaceMenuOpen}
               aria-haspopup="true"
               aria-label={workspaceMenuOpen ? 'Collapse workspace menu' : 'Expand workspace menu'}
@@ -573,7 +577,11 @@ export default function AppLayout() {
                   Invite
                 </button>
               </div>
-              <button className="mt-3 w-full h-9 rounded-lg border border-gray-200 text-sm font-medium text-gray-700 hover:bg-gray-50">
+              <button
+                type="button"
+                disabled
+                className="mt-3 w-full h-9 rounded-lg border border-gray-200 text-sm font-medium text-gray-400 cursor-not-allowed"
+              >
                 + Create Workspace
               </button>
             </div>
@@ -593,9 +601,9 @@ export default function AppLayout() {
           </div>
 
           <nav className="space-y-0.5 text-sm text-gray-700">
-            <NavLink to="/inbox" className={({ isActive }) => `block px-2 py-1.5 rounded-md ${isActive ? 'bg-gray-100 font-medium text-gray-900' : 'hover:bg-gray-50 text-gray-700'}`}>Inbox</NavLink>
-            <NavLink to="/replies" className={({ isActive }) => `block px-2 py-1.5 rounded-md ${isActive ? 'bg-gray-100 font-medium text-gray-900' : 'hover:bg-gray-50 text-gray-700'}`}>Replies</NavLink>
-            <NavLink to="/my-tasks" className={({ isActive }) => `block px-2 py-1.5 rounded-md ${isActive ? 'bg-gray-100 font-medium text-gray-900' : 'hover:bg-gray-50 text-gray-700'}`}>My Tasks</NavLink>
+            <NavLink to="/inbox" className={({ isActive }) => sidebarNavLinkClass(isActive)}>Inbox</NavLink>
+            <NavLink to="/replies" className={({ isActive }) => sidebarNavLinkClass(isActive)}>Replies</NavLink>
+            <NavLink to="/my-tasks" className={({ isActive }) => sidebarNavLinkClass(isActive)}>My Tasks</NavLink>
           </nav>
 
           <div className="mt-4 pt-3 border-t border-gray-200">
@@ -688,11 +696,7 @@ export default function AppLayout() {
               <>
                 <NavLink
                   to="/projects"
-                  className={({ isActive }) =>
-                    `block px-2 py-1.5 rounded-md text-sm ${
-                      isActive ? 'bg-gray-100 font-medium text-gray-900' : 'hover:bg-gray-50 text-gray-700'
-                    }`
-                  }
+                  className={({ isActive }) => `${sidebarNavLinkClass(isActive)} text-sm`}
                 >
                   All Spaces
                 </NavLink>
@@ -732,7 +736,7 @@ export default function AppLayout() {
                           <button
                             type="button"
                             onClick={() => navigate(`/projects/${project.id}`)}
-                            className="flex-1 min-w-0 flex items-center gap-2 py-1 px-1 rounded text-left"
+                            className="flex-1 min-w-0 flex items-center gap-2 py-1 px-1 rounded text-left cursor-pointer"
                           >
                             <span className="w-5 h-5 shrink-0 rounded bg-emerald-500 text-white text-[11px] flex items-center justify-center">
                               {(project.name || 'P').trim().charAt(0).toUpperCase()}
@@ -830,7 +834,7 @@ export default function AppLayout() {
                                       onClick={() =>
                                         navigate(`/projects/${project.id}?list=${list.id}`)
                                       }
-                                      className="flex-1 min-w-0 flex items-center gap-2 py-1 px-1 rounded text-left"
+                                      className="flex-1 min-w-0 flex items-center gap-2 py-1 px-1 rounded text-left cursor-pointer"
                                     >
                                       <ListBulletIcon className="w-4 h-4 shrink-0 text-gray-400" />
                                       <span className="truncate text-[15px] font-medium text-gray-900 min-w-0">
@@ -1029,7 +1033,7 @@ export default function AppLayout() {
                   <button
                     type="button"
                     onClick={() => setCreateSpaceModalOpen(true)}
-                    className="w-full text-left px-2 py-1.5 rounded-md hover:bg-gray-50 text-gray-500 text-sm font-medium"
+                    className="w-full text-left px-2 py-1.5 rounded-md hover:bg-gray-50 text-gray-500 text-sm font-medium cursor-pointer"
                   >
                     + New Space
                   </button>
@@ -1040,7 +1044,11 @@ export default function AppLayout() {
 
           <div className="mt-5 pt-3 border-t border-gray-200">
             <p className="text-[13px] font-semibold uppercase tracking-wide text-gray-500 mb-1.5">Channels</p>
-            <button className="w-full text-left px-2 py-1.5 rounded-md hover:bg-gray-50 text-sm text-gray-700">
+            <button
+              type="button"
+              disabled
+              className="w-full text-left px-2 py-1.5 rounded-md text-sm text-gray-400 cursor-not-allowed"
+            >
               + Add Channel <span className="text-xs text-gray-400 ml-2">Coming soon</span>
             </button>
           </div>
